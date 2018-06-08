@@ -17,7 +17,7 @@
 #include <avr/power.h>
 #endif
 
-#define PIN 13
+#define PIN 14
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(124, PIN, NEO_GRB + NEO_KHZ800);
 
 
@@ -56,16 +56,6 @@ const IPAddress outIp3(192, 168, 1, 10);
 
 const unsigned int portEuler = 7600;
 
-/*not used for this project
-  const unsigned int portEvent = 7500;
-  const unsigned int portMag = 7700;
-  const unsigned int portGyro = 7800;
-  const unsigned int portAccel = 7900;
-  const unsigned int portLinAccel = 8000;
-  const unsigned int portGrav = 8100;
-  const unsigned int portQuat = 8200;
-  not used for this project
-*/
 
 // local port to listen for OSC packets (probably not necessary for this project)
 const unsigned int localPort = 8888;
@@ -73,38 +63,17 @@ const unsigned int localPort = 8888;
 
 // variables for x,y,z data from each separate set of vectors
 
-// Event (.getEvent for positional data
-float eventX, eventY, eventZ;
-
 // Euler vector (degrees 0-359)
 float eulerX, eulerY, eulerZ;
 
-// magnetometer vector ( uT, micro Teslas)
-float magX, magY, magZ;
-
-// Gyroscope vector (rps, radians per second)
-float gyroX, gyroY, gyroZ;
-
-// Accelerometer vector (m/s^2)
-float accelX, accelY, accelZ;
-
-// Linear accelerometer vector (m/s^2)
-float linAccelX, linAccelY, linAccelZ;
-
-// Gravity vector (m/s^2)
-float gravX, gravY, gravZ;
-
-// Quaternions
-float quatW, quatX, quatY, quatZ;
-
-float hue = 0;
-float saturation = 100;
-float value = 50;
+int hue = 0;
+int saturation = 100;
+int value = 50;
 
 void setup() {
 
   strip.begin();
-  strip.show(); // Initialize all pixels to 'off'  `
+  //strip.show(); // Initialize all pixels to 'off'  `
   Serial.begin(115200);
 
   // Connect to WiFi network
@@ -125,18 +94,6 @@ void setup() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  // This section is for recieving OSC on the board.
-  // (not necessary for this project)
-  /*
-    Serial.println("Starting UDP");
-    Udp.begin(localPort);
-    Serial.print("Local port: ");
-    #ifdef ESP32
-    Serial.println(localPort);
-    #else
-    Serial.println(Udp.localPort());
-    #endif
-  */
 
   Serial.println("Orientation Sensor Raw Data Test");
   Serial.println("");
@@ -152,19 +109,6 @@ void setup() {
   delay(1000);
   bno.setExtCrystalUse(true);
 
-
-  // for measuring the temperature near the chip
-  /*
-    // Display the current temperature
-    int8_t temp = bno.getTemp();
-    Serial.print("Current Temperature: ");
-    Serial.print(temp);
-    Serial.println(" C");
-    Serial.println("");
-  */
-
-
-
 }
 
 void loop() {
@@ -179,9 +123,11 @@ void loop() {
   Udp.beginPacket(outIp1, portEuler);
   eulerX.send(Udp);
   Udp.endPacket();
+  delay(2);
   Udp.beginPacket(outIp2, portEuler);
   eulerX.send(Udp);
   Udp.endPacket();
+  delay(2);
   Udp.beginPacket(outIp3, portEuler);
   eulerX.send(Udp);
   Udp.endPacket();
@@ -193,9 +139,11 @@ void loop() {
   Udp.beginPacket(outIp1, portEuler);
   eulerY.send(Udp);
   Udp.endPacket();
+  delay(2);
   Udp.beginPacket(outIp2, portEuler);
   eulerY.send(Udp);
   Udp.endPacket();
+  delay(2);
   Udp.beginPacket(outIp3, portEuler);
   eulerY.send(Udp);
   Udp.endPacket();
@@ -211,22 +159,27 @@ void loop() {
     eulerZ = float(euler.z()) + 360;
   }
 
-  //float hue = int(map(euler.x(), 0, 359, 1, 255));
-  if (euler.x()){
+  hue = int(euler.x());
+  if (hue != NULL){
+    hue = constrain(hue, 0, 359);
     hue = float(euler.x());
     hueShift(hue);
   }
-  //Serial.println(hue);
+
+  Serial.println(hue);
 
 
   OSCMessage eulerZ("/eulerZ");
   eulerZ.add(float(euler.z()));
+  delay(2);
   Udp.beginPacket(outIp1, portEuler);
   eulerZ.send(Udp);
   Udp.endPacket();
+  delay(2);
   Udp.beginPacket(outIp2, portEuler);
   eulerZ.send(Udp);
   Udp.endPacket();
+  delay(2);
   Udp.beginPacket(outIp3, portEuler);
   eulerZ.send(Udp);
   Udp.endPacket();
@@ -236,7 +189,7 @@ void loop() {
   // Display the floating point data in serial monitor
 
   //   Serial.print("eulerX: ");
-  //   Serial.println(euler.x());
+  //    Serial.println(euler.x());
   //   Serial.print("eulerY: ");
   //   Serial.println(euler.y());
   //   Serial.print("eulerZ: ");
@@ -246,6 +199,7 @@ void loop() {
   // END Euler vector messages
 
 
+    delay(20);
 
 
 }
