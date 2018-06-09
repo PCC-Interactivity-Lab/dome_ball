@@ -68,7 +68,7 @@ float eulerX, eulerY, eulerZ;
 
 int hue = 0;
 int saturation = 100;
-int value = 50;
+int value = 25;
 
 void setup() {
 
