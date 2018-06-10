@@ -18,7 +18,7 @@
 #endif
 
 #define PIN 14
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(124, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
 
 
 //
@@ -70,6 +70,8 @@ int hue = 0;
 int saturation = 100;
 int value = 25;
 
+int frameCounter = 0;
+
 void setup() {
 
   strip.begin();
@@ -114,41 +116,62 @@ void setup() {
 void loop() {
   sensors_event_t event; 
   bno.getEvent(&event);
-
   // BEGIN Euler vector messages
   imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
+  frameCounter = frameCounter %10;
+  
+  if (frameCounter == 0){ //only send OSC every 10 frames
 
-  OSCMessage eulerX("/eulerX");
-  eulerX.add(float(euler.x()));
-  Udp.beginPacket(outIp1, portEuler);
-  eulerX.send(Udp);
-  Udp.endPacket();
-  delay(2);
-  Udp.beginPacket(outIp2, portEuler);
-  eulerX.send(Udp);
-  Udp.endPacket();
-  delay(2);
-  Udp.beginPacket(outIp3, portEuler);
-  eulerX.send(Udp);
-  Udp.endPacket();
-  eulerX.empty();
-  delay(2);
+    OSCMessage eulerX("/eulerX");
+    eulerX.add(float(euler.x()));
+    Udp.beginPacket(outIp1, portEuler);
+    eulerX.send(Udp);
+    Udp.endPacket();
+    delay(2);
+    Udp.beginPacket(outIp2, portEuler);
+    eulerX.send(Udp);
+    Udp.endPacket();
+    delay(2);
+    Udp.beginPacket(outIp3, portEuler);
+    eulerX.send(Udp);
+    Udp.endPacket();
+    eulerX.empty();
+    delay(2);
 
-  OSCMessage eulerY("/eulerY");
-  eulerY.add(float(euler.y()));
-  Udp.beginPacket(outIp1, portEuler);
-  eulerY.send(Udp);
-  Udp.endPacket();
-  delay(2);
-  Udp.beginPacket(outIp2, portEuler);
-  eulerY.send(Udp);
-  Udp.endPacket();
-  delay(2);
-  Udp.beginPacket(outIp3, portEuler);
-  eulerY.send(Udp);
-  Udp.endPacket();
-  eulerY.empty();
-  delay(2);
+    OSCMessage eulerY("/eulerY");
+    eulerY.add(float(euler.y()));
+    Udp.beginPacket(outIp1, portEuler);
+    eulerY.send(Udp);
+    Udp.endPacket();
+    delay(2);
+    Udp.beginPacket(outIp2, portEuler);
+    eulerY.send(Udp);
+    Udp.endPacket();
+    delay(2);
+    Udp.beginPacket(outIp3, portEuler);
+    eulerY.send(Udp);
+    Udp.endPacket();
+    eulerY.empty();
+    delay(2);
+
+    
+    OSCMessage eulerZ("/eulerZ");
+    eulerZ.add(float(euler.z()));
+    delay(2);
+    Udp.beginPacket(outIp1, portEuler);
+    eulerZ.send(Udp);
+    Udp.endPacket();
+    delay(2);
+    Udp.beginPacket(outIp2, portEuler);
+    eulerZ.send(Udp);
+    Udp.endPacket();
+    delay(2);
+    Udp.beginPacket(outIp3, portEuler);
+    eulerZ.send(Udp);
+    Udp.endPacket();
+    eulerZ.empty();
+    delay(2);
+  }
 
 
   // YAW - shifts values to keep range from 0-359
@@ -164,27 +187,11 @@ void loop() {
     hue = constrain(hue, 0, 359);
     hue = float(euler.x());
     hueShift(hue);
+      //Serial.println(hue);
+
   }
 
-  Serial.println(hue);
 
-
-  OSCMessage eulerZ("/eulerZ");
-  eulerZ.add(float(euler.z()));
-  delay(2);
-  Udp.beginPacket(outIp1, portEuler);
-  eulerZ.send(Udp);
-  Udp.endPacket();
-  delay(2);
-  Udp.beginPacket(outIp2, portEuler);
-  eulerZ.send(Udp);
-  Udp.endPacket();
-  delay(2);
-  Udp.beginPacket(outIp3, portEuler);
-  eulerZ.send(Udp);
-  Udp.endPacket();
-  eulerZ.empty();
-  delay(2);
 
   // Display the floating point data in serial monitor
 
